@@ -26,13 +26,24 @@ class Article: Object, Mappable {
     dynamic var excerpt: String = ""
     dynamic var wordCount: Int = 0
     dynamic var datePublished: Date = Date()
+    
     dynamic var state: State = .invisible
-    dynamic var uuid: String = UUID().uuidString
+    dynamic var originalURL: String = ""
+    dynamic var dateCreated: Date = Date()
     
     required convenience init?(map: Map) {
         self.init()
     }
     
+    override func isEqual(_ object: Any?) -> Bool {
+        guard let rhs = object as? Article else { return false }
+        return self.originalURL == rhs.originalURL
+    }
+}
+
+// MARK: - ObjectMapper
+
+extension Article {
     func mapping(map: Map) {
         title <- map["title"]
         content <- map["content"]
@@ -44,9 +55,11 @@ class Article: Object, Mappable {
         wordCount <- map["word_count"]
         state <- map["stateRaw"]
     }
-    
-    override func isEqual(_ object: Any?) -> Bool {
-        guard let rhs = object as? Article else { return false }
-        return self.uuid == rhs.uuid
+}
+
+// MARK: - Realm
+extension Article {
+    override static func primaryKey() -> String? {
+        return "originalURL"
     }
 }

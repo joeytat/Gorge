@@ -8,63 +8,74 @@
 
 import Foundation
 import RxSwift
+import RxCocoa
 import RxOptional
 import Moya
 import Moya_ObjectMapper
 import ObjectMapper
+import RxRealm
+import RealmSwift
 
 enum ParseResult {
     case finished(article: Article)
     case failed(message: String)
 }
 
-enum ArticleResult {
-    case finished(article: Article)
-    case failed(message: String)
-}
-
 struct ArticleListModel {
-    let provider: RxMoyaProvider<Mercury>
-    let articleURL: Observable<String>
-    let articles: Variable<[Article]> = Variable([])
+    //    let articles: Observable<[Article]>
+    let urlValidation: Observable<String>
+    let addArticle: Observable<ParseResult>
     
-    func addArticle() -> Observable<ArticleResult> {
-        return articleURL
-            .observeOn(MainScheduler.asyncInstance)
-            .flatMap {url in
-                return self.parseURL(url: url)
-            }
-            .flatMap {(result: ParseResult) -> Observable<ArticleResult> in
-                switch result {
-                case .failed(let message):
-                    return Observable.just(ArticleResult.failed(message: message))
-                case .finished(let article):
-                    guard let index = self.articles.value.index(of: article) else {
-                        self.articles.value.insert(article, at: 0)
-                        return Observable.just(ArticleResult.finished(article: article))
-                    }
-                    self.articles.value.remove(at: index)
-                    self.articles.value.insert(article, at: index)
-                    return Observable.just(ArticleResult.finished(article: article))
-                }
-            }
-    }
-    
-    internal func parseURL(url: String) -> Observable<ParseResult> {
-        // TODO: - I don't think placeholder data should be here
-        let parsingArticle = Article()
-        parsingArticle.url = url
-        parsingArticle.state = .parsing
-        self.articles.value.insert(parsingArticle, at: 0)
+    init(addButtonTap: Observable<Void>) {
+        let pasteboardChanged = NotificationCenter.default.rx
+            .notification(Notification.Name.UIPasteboardChanged)
+        let didBecomeActive = NotificationCenter.default.rx
+            .notification(Notification.Name.UIApplicationDidBecomeActive)
         
-        return self.provider
-            .request(Mercury.parse(url: url))
-            .mapObject(Article.self)
-            .map {article in
-                article.state = .downloaded
-                article.uuid = parsingArticle.uuid
-                return ParseResult.finished(article: article)
+        urlValidation = Observable
+            .of(pasteboardChanged, didBecomeActive)
+            .merge()
+            .flatMap{ n -> Observable<String> in
+                guard let clipStr = UIPasteboard.general.string, clipStr.isURL() else {
+                    return Observable.never()
+                }
+                return  Observable.just(clipStr)
             }
-            .catchErrorJustReturn(ParseResult.failed(message: "Parse Failed"))
+            .distinctUntilChanged()
+            .shareReplay(1)
+        
+        addArticle = Observable
+            .zip(urlValidation, addButtonTap) { $0.0 }
+            .do(onNext: { url in
+                let realm = try! Realm()
+                let article = Article()
+                article.originalURL = url
+                try! realm.write {
+                    realm.add(article)
+                }
+            })
+            .flatMap{ MercuryProvider.request(Mercury.parse(url: $0))}
+            .mapObject(Article.self)
+            .map {article -> ParseResult in
+                article.state = .downloaded
+                if let url = UIPasteboard.general.string, url.isURL() {
+                    article.originalURL = url
+                } else {
+                    article.originalURL = article.url
+                }
+                return .finished(article: article)
+            }
+            .do(onNext: { result in
+                switch result {
+                case .finished(let article) :
+                    let realm = try! Realm()
+                    try! realm.write {
+                        realm.add(article, update: true)
+                    }
+                case .failed(let message):
+                    logging(message)
+                }
+            })
+            .catchErrorJustReturn(.failed(message: "Failed to add article"))
     }
 }

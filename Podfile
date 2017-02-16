@@ -11,7 +11,7 @@ target 'Gorge' do
     pod 'Moya-ObjectMapper/RxSwift'
     pod 'Moya'
     pod 'RxOptional'
-    pod 'RealmSwift'
+    pod 'RxRealm'
 end
 
 post_install do |installer|

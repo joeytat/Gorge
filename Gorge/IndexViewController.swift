@@ -12,6 +12,8 @@ import RxCocoa
 import RxGesture
 import SnapKit
 import Moya
+import RealmSwift
+import RxRealm
 
 class IndexViewController: ViewController, UITableViewDelegate {
     @IBOutlet weak var tableView: UITableView!
@@ -69,61 +71,51 @@ class IndexViewController: ViewController, UITableViewDelegate {
     private func rxSetup() {
         provider = MercuryProvider
         
-        articleListModel = ArticleListModel(
-            provider: provider,
-            articleURL: latestPastboardString)
+        articleListModel = ArticleListModel(addButtonTap:
+            addContainerView.addButton.rx.tap.asObservable())
         
-        articleListModel.addArticle()
-            .subscribe(onNext: { parseResult in
-                switch parseResult {
-                case .failed(let messgage):
-                    logging(messgage)
-                case .finished(let article):
-                    logging(article)
-                }
+        articleListModel.urlValidation
+            .subscribe(onNext: {[weak self] url in
+                self?.addContainerView.populate(url: url)
+                self?.displayAddContainer = true
             })
+            .addDisposableTo(disposeBag)
+        
+        articleListModel.addArticle
+            .subscribe(onNext: { n in
+                print(n)
+            })
+            .addDisposableTo(disposeBag)
+        
+        let realm = try! Realm()
+        let articles = realm.objects(Article.self)
+        Observable.array(from: articles)
+            .bindTo(tableView.rx.items(cellIdentifier: "ArticleTableViewCell", cellType: ArticleTableViewCell.self)) { (row, element, cell) in
+                cell.populate(element)
+            }
             .addDisposableTo(disposeBag)
         
         // Add Container
         addContainerView.rx.gesture(.tap, .swipeDown)
-            .subscribe(onNext: { _ in
-                self.displayAddContainer = false
+            .subscribe(onNext: {[weak self] _ in
+                self?.displayAddContainer = false
             })
             .addDisposableTo(disposeBag)
         
-        // TableView
-        articleListModel.articles.asObservable()
-            .bindTo(tableView.rx.items(cellIdentifier: "ArticleTableViewCell", cellType: ArticleTableViewCell.self)) { (row, element, cell) in
-                cell.populate(element)
-            }
-            .disposed(by: disposeBag)
+        addContainerView.addButton.rx.tap
+            .asDriver()
+            .drive(onNext: {[weak self] _ in
+                self?.displayAddContainer = false
+            })
+            .addDisposableTo(disposeBag)
         
         tableView.rx.itemSelected
             .subscribe(onNext: { indexPath in
                 self.tableView.deselectRow(at: indexPath, animated: false)
             })
             .addDisposableTo(disposeBag)
-        
-        // UIPasteboard
-        NotificationCenter.default.rx
-            .notification(Notification.Name.UIPasteboardChanged)
-            .subscribe(onNext: { n in
-                self.detectClipboardURL()
-            })
-            .addDisposableTo(disposeBag)
-        
-        // App
-        NotificationCenter.default.rx
-            .notification(Notification.Name.UIApplicationDidBecomeActive)
-            .subscribe(onNext: { n in
-                self.detectClipboardURL()
-            })
-            .addDisposableTo(disposeBag)
     }
     
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        return .lightContent
-    }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -132,27 +124,10 @@ class IndexViewController: ViewController, UITableViewDelegate {
                 self.addContainerViewBottomConstraint = make.bottom.equalTo(self.view.snp.bottom).offset(addContainerView.height).constraint
                 make.leading.trailing.equalTo(self.view)
             }
-            delay(1, closure: {
-                self.detectClipboardURL()
-            })
         }
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
-    
-    
-    fileprivate func detectClipboardURL() {
-        logging("Pastboard String \(UIPasteboard.general.string)")
-        guard let clipStr = UIPasteboard.general.string else { return }
-        let isURL = clipStr.isURL()
-        if (isURL) {
-            displayAddContainer = true
-            self.addContainerView.populate(url: clipStr)
-        } else {
-            displayAddContainer = false
-        }
-    }
-    
 }
