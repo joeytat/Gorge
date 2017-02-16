@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		369DB928778066381246EAF6 /* Pods_Gorge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96B79C79A7E8B227C71A33A5 /* Pods_Gorge.framework */; };
+		D40CECE11E554C040071DACF /* Logging+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CECE01E554C040071DACF /* Logging+Extension.swift */; };
 		D42079D81E49B1D300CE29BC /* ReaderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42079D71E49B1D300CE29BC /* ReaderViewController.swift */; };
 		D42079DB1E49B4CF00CE29BC /* Article.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42079DA1E49B4CF00CE29BC /* Article.swift */; };
 		D42079E31E49BEEA00CE29BC /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42079E21E49BEEA00CE29BC /* Error.swift */; };
@@ -33,6 +34,7 @@
 		65AF63B14D210C1121FD4374 /* Pods-Gorge.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Gorge.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Gorge/Pods-Gorge.debug.xcconfig"; sourceTree = "<group>"; };
 		96B79C79A7E8B227C71A33A5 /* Pods_Gorge.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Gorge.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		995CD3FD1D80721D69367965 /* Pods-Gorge.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Gorge.release.xcconfig"; path = "Pods/Target Support Files/Pods-Gorge/Pods-Gorge.release.xcconfig"; sourceTree = "<group>"; };
+		D40CECE01E554C040071DACF /* Logging+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Logging+Extension.swift"; sourceTree = "<group>"; };
 		D42079D71E49B1D300CE29BC /* ReaderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReaderViewController.swift; sourceTree = "<group>"; };
 		D42079DA1E49B4CF00CE29BC /* Article.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Article.swift; sourceTree = "<group>"; };
 		D42079E21E49BEEA00CE29BC /* Error.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Error.swift; sourceTree = "<group>"; };
@@ -162,6 +164,7 @@
 			children = (
 				D4DCC7BE1E4718A60022A2FB /* String+Extensions.swift */,
 				D4377FF91E4867C00049A2AD /* UIView+Extensions.swift */,
+				D40CECE01E554C040071DACF /* Logging+Extension.swift */,
 			);
 			name = Extensions;
 			sourceTree = "<group>";
@@ -358,6 +361,7 @@
 				D42079DB1E49B4CF00CE29BC /* Article.swift in Sources */,
 				D42079E51E4C5F1D00CE29BC /* ArticleListModel.swift in Sources */,
 				D4DCC7BF1E4718A60022A2FB /* String+Extensions.swift in Sources */,
+				D40CECE11E554C040071DACF /* Logging+Extension.swift in Sources */,
 				D4DCC7C31E4723260022A2FB /* Thread.swift in Sources */,
 				D42079E31E49BEEA00CE29BC /* Error.swift in Sources */,
 				D4548E501E46D27800AD21E8 /* ArticleTableViewCell.swift in Sources */,

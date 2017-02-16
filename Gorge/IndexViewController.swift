@@ -77,9 +77,9 @@ class IndexViewController: ViewController, UITableViewDelegate {
             .subscribe(onNext: { parseResult in
                 switch parseResult {
                 case .failed(let messgage):
-                    print(messgage)
+                    logging(messgage)
                 case .finished(let article):
-                    print(article)
+                    logging(article)
                 }
             })
             .addDisposableTo(disposeBag)
@@ -144,7 +144,7 @@ class IndexViewController: ViewController, UITableViewDelegate {
     
     
     fileprivate func detectClipboardURL() {
-        print("Pastboard String \(UIPasteboard.general.string)")
+        logging("Pastboard String \(UIPasteboard.general.string)")
         guard let clipStr = UIPasteboard.general.string else { return }
         let isURL = clipStr.isURL()
         if (isURL) {
