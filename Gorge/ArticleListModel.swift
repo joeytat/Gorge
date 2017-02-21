@@ -25,6 +25,8 @@ struct ArticleListModel {
     //    let articles: Observable<[Article]>
     let urlValidation: Observable<String>
     let addArticle: Observable<ParseResult>
+    let articles: Observable<[Article]>
+    
     
     init(addButtonTap: Observable<Void>) {
         let pasteboardChanged = NotificationCenter.default.rx
@@ -77,5 +79,8 @@ struct ArticleListModel {
                 }
             })
             .catchErrorJustReturn(.failed(message: "Failed to add article"))
+        
+        let realm = try! Realm()
+        articles = Observable.array(from: realm.objects(Article.self))
     }
 }

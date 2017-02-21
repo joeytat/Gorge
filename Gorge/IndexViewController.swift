@@ -12,8 +12,6 @@ import RxCocoa
 import RxGesture
 import SnapKit
 import Moya
-import RealmSwift
-import RxRealm
 
 class IndexViewController: ViewController, UITableViewDelegate {
     @IBOutlet weak var tableView: UITableView!
@@ -87,9 +85,8 @@ class IndexViewController: ViewController, UITableViewDelegate {
             })
             .addDisposableTo(disposeBag)
         
-        let realm = try! Realm()
-        let articles = realm.objects(Article.self)
-        Observable.array(from: articles)
+        articleListModel
+            .articles
             .bindTo(tableView.rx.items(cellIdentifier: "ArticleTableViewCell", cellType: ArticleTableViewCell.self)) { (row, element, cell) in
                 cell.populate(element)
             }

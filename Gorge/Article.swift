@@ -26,7 +26,6 @@ class Article: Object, Mappable {
     dynamic var excerpt: String = ""
     dynamic var wordCount: Int = 0
     dynamic var datePublished: Date = Date()
-    
     dynamic var state: State = .invisible
     dynamic var originalURL: String = ""
     dynamic var dateCreated: Date = Date()
