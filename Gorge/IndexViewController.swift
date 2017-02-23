@@ -107,7 +107,8 @@ class IndexViewController: ViewController, UITableViewDelegate {
             .addDisposableTo(disposeBag)
         
         tableView.rx.itemSelected
-            .subscribe(onNext: { indexPath in
+            .asDriver()
+            .drive(onNext: { indexPath in
                 self.tableView.deselectRow(at: indexPath, animated: false)
             })
             .addDisposableTo(disposeBag)
